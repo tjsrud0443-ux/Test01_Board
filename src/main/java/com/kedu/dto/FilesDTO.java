@@ -39,10 +39,4 @@ public class FilesDTO {
 	public void setParent_seq(int parent_seq) {
 		this.parent_seq = parent_seq;
 	}
-	
-	
-
-	
-	
-
 }

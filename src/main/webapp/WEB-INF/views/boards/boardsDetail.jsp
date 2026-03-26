@@ -155,11 +155,114 @@ height: 50px; font-size: large;}
 
 										<!-- 댓글 -->
 	
+	<div class="replyContainer">
 
+		<form action="/replys/insert" method="post" class="replyFrm">
+			<div class="replyContentsDiv">
+
+					<input type="hidden" name="parent_seq" class="inputParent_seq" value="${dto.seq}"> 
+					<input type="hidden" name="writer" class="inputWriter" value="${loginId}"> 
+					<input type="hidden" name="contents" class="inputContents"> 
+					<input type="text" placeholder="댓글을 남겨보세요." class="inputReply">
+					
+				<button class="replyBtn" type="submit">등록</button>
+			</div>
+		</form>
+		<div id="replyList"></div>
+	</div>
 
 	<script>
+		$(".replyFrm").on("submit", function() {
+			$(".inputContents").val($(".inputReply").val());
+		})
 		
-		
+	
+		let seq = "${dto.seq}";
+		let writer = "${dto.writer}";
+		let cpage = "${cPage}";
+		let loginId = "${loginId}";
+			
+		$(function(){
+			$.ajax({
+				url:"/boards/replyList",	
+				data:{seq:seq},
+				dataType:"json"
+			}).done(function(resp){ // Json으로 들어온 값을 다시 역직렬화 해야 함.
+				
+				for(let i of resp){
+					if(seq == i.parent_seq){
+						let replyDiv = $("<div>").addClass("replyDiv");
+						
+						replyDiv.append(
+								$("<div>").addClass("reply replyWriter").text(i.writer),
+								$("<div>").addClass("reply replyContents").attr("data-origin", i.contents).text(i.contents),
+								$("<div>").addClass("reply replyWrite_date").text(i.write_date),
+								$("<hr>").attr("style","width:97%;")
+
+								);
+						
+						if(loginId == i.writer){
+							let replyBtnDiv = $("<div>").addClass("replyBtnDiv")
+							
+							let upFrm = $("<form>").addClass("upFrm").attr({
+								action : "/replys/update",
+								method : "post"
+							})
+							
+							upFrm.append(
+								$("<input>").addClass("inputCon").attr({
+								type:"hidden",
+								name:"contents"}),
+							
+								$("<input>").addClass("inputSeq").attr({
+									type:"hidden",
+									name:"seq",
+									value: i.seq}),
+								
+								$("<input>").addClass("inputParent_seq").attr({
+									type:"hidden",
+									name:"parent_seq",
+									value: i.parent_seq}),
+							
+								$("<button>").addClass("upBtn rBtn").attr("type","button").text("수정"),
+								$("<button>").addClass("saveBtn rsBtn").attr("type","submit").text("저장").hide(),
+								$("<button>").addClass("bBtn rsBtn").attr("type","button").text("취소").hide()
+							
+							);
+							
+							
+							let deleteFrm = $("<form>").addClass("deleteFrm").attr({
+								action : "/replys/delete",
+								method : "post"
+							})
+							
+							deleteFrm.append(
+								$("<input>").addClass("inputSeq").attr({
+								type:"hidden",
+								name:"seq",
+								value: i.seq
+							}),
+							
+							$("<input>").addClass("inputParent_seq").attr({
+								type:"hidden",
+								name:"parent_seq",
+								value: i.parent_seq}),
+							
+							$("<input>").addClass("cPage").attr({
+								type:"hidden",
+								name:"cpage",
+								value: cpage}),
+							
+							$("<button>").addClass("dBtn").attr("type","submit").text("삭제")
+							)
+							replyBtnDiv.append(upFrm,deleteFrm);
+							replyDiv.append(replyBtnDiv);
+						}
+					$("#replyList").append(replyDiv);
+					}
+				}
+			});
+		});
 		
 		// 게시글
 		$("#update").on("click", function() {
@@ -183,6 +286,28 @@ height: 50px; font-size: large;}
 
 		
 		// 코멘트 -----------------------------
+		$(document).on("click", ".upBtn", function(){
+			let replyDiv = $(this).closest(".replyDiv");
+			replyDiv.find(".replyContents").attr("contenteditable", "true");
+
+			$(this).siblings(".rsBtn").show();
+    		$(this).hide();
+    		replyDiv.find(".dBtn").hide();
+		})
+	
+		$(document).on("click", ".bBtn", function() {
+			let replyDiv = $(this).closest(".replyDiv");
+			let originText = replyDiv.find(".replyContents").data("origin");
+			replyDiv.find(".replyContents").html(originText).attr("contenteditable", "false");
+			$(this).hide();
+			$(this).siblings(".rsBtn").hide();
+			$(this).siblings(".upBtn").show();
+			replyDiv.find(".dBtn").show();
+		});
+
+		$(document).on("submit", ".upFrm", function(){
+			$(this).find(".inputCon").val($(this).closest(".replyDiv").find(".replyContents").text());
+		});
 
 		
 	</script>

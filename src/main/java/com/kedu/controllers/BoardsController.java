@@ -9,11 +9,14 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.google.gson.Gson;
 import com.kedu.dao.BoardsDAO;
 import com.kedu.dao.FilesDAO;
+import com.kedu.dao.ReplysDAO;
 import com.kedu.dto.BoardsDTO;
+import com.kedu.dto.ReplysDTO;
 
 @Controller
 @RequestMapping("/boards")
@@ -28,12 +31,17 @@ public class BoardsController {
 	@Autowired
 	private Gson gson;
 	
+	@Autowired
+	private ReplysDAO rdao;
+	
+	
+	
 	@RequestMapping("/list")
 	public String toBoard(int cPage, Model model, HttpSession session) {
 		
 		
 		List<BoardsDTO> list = boardsDao.getFromTo(cPage * 10 - 9, cPage * 10);
-		// Board Å×ÀÌºíÀÇ µ¥ÀÌÅÍ°¡ ÃÑ ¸î°³ÀÎÁö ¾ò¾î¿Â´Ù
+		// Board ï¿½ï¿½ï¿½Ìºï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Í°ï¿½ ï¿½ï¿½ ï¿½î°³ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Â´ï¿½
 		//		int recordTotalCount = list.size();
 		int recordTotalCount = boardsDao.totalCount();
 		model.addAttribute("naviCountPerPage", 10);
@@ -55,7 +63,7 @@ public class BoardsController {
 		return "boards/boardsDetail";
 	}
 
-	// ±Û ¾÷·Îµå
+	// ï¿½ï¿½ ï¿½ï¿½ï¿½Îµï¿½
 	@RequestMapping("/postUpload")
 	public String postUp(BoardsDTO dto) throws Exception {
 
@@ -65,28 +73,28 @@ public class BoardsController {
 
 		int result = boardsDao.postUpload(nextVal, dto);
 
-		// file ¿Ã¸®´Â °÷
+		// file ï¿½Ã¸ï¿½ï¿½ï¿½ ï¿½ï¿½
 
 		return "redirect:/boards/list?cPage=1";
 	}
 
 	
-		// Á¶È¸¼ö Áõ°¡ ¹× detail ¸®·Îµå
+		// ï¿½ï¿½È¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ detail ï¿½ï¿½ï¿½Îµï¿½
 		@RequestMapping("/detail")
 		public String detail(int seq, Model model) {
 			
-			// Á¶È¸¼ö Áõ°¡ dao
+			// ï¿½ï¿½È¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ dao
 			BoardsDTO dto = boardsDao.lookDetail(seq);
 			model.addAttribute("dto", dto);
-			// ÆÄÀÏ¸í º¸³»ÁÖ±â
+			// ï¿½ï¿½ï¿½Ï¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ö±ï¿½
 
-			// ´ñ±Û dto ´ñ±Û¸ñ·ÏÈ®ÀÎ
+			// ï¿½ï¿½ï¿½ dto ï¿½ï¿½Û¸ï¿½ï¿½È®ï¿½ï¿½
 			
 			return "boards/boardsDetail";
 
 		}
 
-		// ±Û »èÁ¦
+		// ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 		@RequestMapping("/delete")
 		public String del(int seq,HttpSession session) {
 			
@@ -94,19 +102,19 @@ public class BoardsController {
 			int result = boardsDao.deleteContent(seq);
 
 			if (result > 0) {
-				System.out.println("»èÁ¦¼º°ø");
+				System.out.println("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½");
 			}
 			return "redirect:/boards/list?cPage="+cPage;
 		}
 
-		// ±Û ¼öÁ¤
+		// ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 		@RequestMapping("/update")
 		public String up(BoardsDTO dto, int seq) {
 
 			int result = boardsDao.updateContent(dto);
 
 			if (result > 0) {
-				System.out.println("°Ô½Ã±Û ¾÷µ¥ÀÌÆ® ¼º°ø");
+				System.out.println("ï¿½Ô½Ã±ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½");
 			}
 			return "redirect:/boards/detail?seq=" + seq;
 		}
@@ -115,5 +123,16 @@ public class BoardsController {
 		public String exceptionHandler(Exception e) {
 			e.printStackTrace();
 			return "error";
+		}
+		
+		@ResponseBody()
+		@RequestMapping("/replyList")
+		public String replyList(int seq) {
+			List<ReplysDTO> list = rdao.selectAll(); // ëŒ“ê¸€
+			
+			String result = gson.toJson(list); // dtoë¥¼ Jsonë¬¸ë²•ìœ¼ë¡œ ì§ë ¬í™”í•´ë¼.
+			System.out.println(result);
+			
+			return result;
 		}
 	}
