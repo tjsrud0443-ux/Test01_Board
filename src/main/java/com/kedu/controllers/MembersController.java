@@ -48,7 +48,7 @@ public class MembersController {
 		}
 
 		// 로그인 버튼 누르면 목록 창 띄우기
-		@RequestMapping("/Login")
+		@RequestMapping("/login")
 		public String login(String id, String pw, HttpSession session) throws Exception {
 
 			boolean result = dao.login(id, pw);
@@ -59,7 +59,7 @@ public class MembersController {
 		}
 
 		// 로그아웃 버튼 누르고 로그아웃 하기
-		@RequestMapping("/Logout")
+		@RequestMapping("/logout")
 		public String logout(HttpSession session) throws Exception {
 
 			session.invalidate();
@@ -78,7 +78,7 @@ public class MembersController {
 		}
 
 		// 마이페이지 이동하기
-		@RequestMapping("/updateMypage")
+		@RequestMapping("/myPage")
 		public String mypage(Model model, HttpSession session) throws Exception {
 
 			String id = (String)session.getAttribute("loginId");
@@ -98,7 +98,7 @@ public class MembersController {
 		}
 
 		// 회원탈퇴 버튼 누르면 확인 페이지로 이동
-		@RequestMapping("/withdraw")
+		@RequestMapping("/deleteAccount")
 		public String withdraw2(HttpSession session) throws Exception {
 
 			String id = (String)session.getAttribute("loginId");
@@ -118,7 +118,7 @@ public class MembersController {
 
 			dao.update(dto, id);
 
-			return "redirect:/members/updateMypage";
+			return "redirect:/members/myPage";
 		}
 
 		@ExceptionHandler(Exception.class) 

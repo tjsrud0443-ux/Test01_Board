@@ -144,7 +144,7 @@
         search.onclick = function() {
             new kakao.Postcode({
                 oncomplete: function (data) {
-                    document.getElementById("zipcode").value = data.zipcode;
+                    document.getElementById("zipcode").value = data.zonecode;
                     document.getElementById("address1").value = data.roadAddress;
             }
                 }).open();
